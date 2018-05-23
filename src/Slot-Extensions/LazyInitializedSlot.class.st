@@ -50,6 +50,28 @@ LazyInitializedSlot >> definitionString [
 				nextPut: $) ]
 ]
 
+{ #category : #'code generation' }
+LazyInitializedSlot >> emitStore: aMethodBuilder [
+
+	aMethodBuilder storeInstVar: index
+]
+
+{ #category : #'code generation' }
+LazyInitializedSlot >> emitValue: methodBuilder [
+
+	methodBuilder 
+		pushInstVar: index;
+		pushDup;
+		pushLiteral: nil;
+		send: #==;
+		jumpAheadTo: #nilValue if: false;
+		popTop;
+		pushLiteralVariable: #slot -> self;
+		pushReceiver;
+		send: #readOnlyWrapperFor:;
+		jumpAheadTarget: #nilValue.
+]
+
 { #category : #accessing }
 LazyInitializedSlot >> initializationBlock [
 	^ initializationBlock
@@ -64,13 +86,20 @@ LazyInitializedSlot >> initializationBlock: anObject [
 LazyInitializedSlot >> read: anObject [
 	| obj |
 	obj := super read: anObject.
-	^ obj
-		ifNil: [ 
-				ReadOnlyWrapper new
-					slot: self;
-					sharedValue: defaultValue;
-					creationBlock: initializationBlock;
-					target: anObject;				
-					yourself ]
-		ifNotNil: [ obj ]
+	^ self wrapperFor: anObject orValue: obj.
+]
+
+{ #category : #'meta-object-protocol' }
+LazyInitializedSlot >> readOnlyWrapperFor: anObject [
+	^ ReadOnlyWrapper new
+		slot: self;
+		sharedValue: defaultValue;
+		creationBlock: initializationBlock;
+		target: anObject;
+		yourself
+]
+
+{ #category : #'meta-object-protocol' }
+LazyInitializedSlot >> wrapperFor: anObject orValue: obj [
+	^ obj ifNil: [ self readOnlyWrapperFor: anObject ]
 ]
