@@ -13,12 +13,18 @@ LazyInitializedSlotTest >> setUp [
  super setUp.
 
  testClass := Object subclass: #OrderedCollectionTestClass
-	slots: { #anSlot => (LazyInitializedSlot default: [ OrderedCollection new ] initializationBlock: [ OrderedCollection new ]) }
+	slots: self slotDefinitions
 	classVariables: {  }
 	package: 'Slot-Extensions'.
 	
 
  testClass compile: 'anSlot ^ anSlot'.
+]
+
+{ #category : #tests }
+LazyInitializedSlotTest >> slotDefinitions [
+
+	^ { #anSlot => (LazyInitializedSlot default: [ OrderedCollection new ] initializationBlock: [ OrderedCollection new ]) }
 ]
 
 { #category : #tests }
@@ -33,7 +39,6 @@ LazyInitializedSlotTest >> testReferenceToProxyIsUpdated [
 	| x r |
 	x := testClass new.
 	
-	self assert: (x instVarAt: 1) isNil.
 	r := x anSlot.
 	
 	self assert: x anSlot isEmpty.	
@@ -51,9 +56,8 @@ LazyInitializedSlotTest >> testReturningAlwaysTheSame [
 	| x r |
 	x := testClass new.
 	
-	self assert: (x instVarAt: 1) isNil.
 	r := x anSlot.
-	
+		
 	self assert: x anSlot isEmpty.	
 	self assert: x anSlot equals: r.
 
@@ -64,7 +68,6 @@ LazyInitializedSlotTest >> testSimpleAdding [
 	| x |
 	x := testClass new.
 	
-	self assert: (x instVarAt: 1) isNil.
 	self assert: x anSlot isEmpty.
 	
 	self assert: (x anSlot add: 12) equals: 12.
