@@ -21,7 +21,7 @@ NilAwareSlot >> doWrite: aValue to: anObject [
 	| nilMap newValues realIndex oldValues usedIndexes|
 
 	"Using the original nilMap I calculate the used indexes and the original values."
-	nilMap := (self nilMapSlotOf: anObject class) read: anObject.
+	nilMap := ((self nilMapSlotOf: anObject class) read: anObject) ifNil: [0].
 	usedIndexes := self usedIndexesOf: nilMap.
 	oldValues := ((self valuesSlotOf: anObject class) read: anObject) ifNil: [#()].
 
@@ -71,7 +71,7 @@ NilAwareSlot >> nilMapSlotOf: aClass [
 { #category : #'meta-object-protocol' }
 NilAwareSlot >> read: anObject [
 	| nilMap values |
-	nilMap := (self nilMapSlotOf: anObject class) read: anObject.
+	nilMap := ((self nilMapSlotOf: anObject class) read: anObject) ifNil: [0].
 	(nilMap bitAt: index) = 0 ifTrue: [ ^nil ].
 	
 	values := (self valuesSlotOf: anObject class) read: anObject.
@@ -125,7 +125,7 @@ NilAwareSlot >> write: aValue to: anObject [
 NilAwareSlot >> writeNilTo: anObject [
 
 	| nilMap values |
-	nilMap := (self nilMapSlotOf: anObject class) read: anObject.
+	nilMap := ((self nilMapSlotOf: anObject class) read: anObject) ifNil: [0].
 	(nilMap bitAt: index) = 0 ifTrue: [^ nil].
 
 	values := (self valuesSlotOf: anObject class) read: anObject.
