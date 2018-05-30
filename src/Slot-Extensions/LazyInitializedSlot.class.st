@@ -1,6 +1,6 @@
 Class {
 	#name : #LazyInitializedSlot,
-	#superclass : #IndexedSlot,
+	#superclass : #Slot,
 	#instVars : [
 		'defaultValue',
 		'initializationBlock',
@@ -11,14 +11,11 @@ Class {
 
 { #category : #'instance creation' }
 LazyInitializedSlot class >> default: aDefaultBlock initializationBlock: anInitializationBlock [
-	aDefaultBlock isClean
-		ifFalse: [ self error: 'Default value block should be clean (only using globally access variables)' ].
-	anInitializationBlock isClean
-		ifFalse: [ self error: 'Initialization block should be clean (only using globally access variables)' ].
-	^ self new
-		defaultValue: aDefaultBlock ;
-		initializationBlock: anInitializationBlock;
-		yourself
+	
+	^ self
+		default: aDefaultBlock
+		initializationBlock: anInitializationBlock
+		baseSlot: BaseSlot new
 ]
 
 { #category : #'instance creation' }
@@ -91,17 +88,13 @@ LazyInitializedSlot >> definitionString [
 { #category : #'code generation' }
 LazyInitializedSlot >> emitStore: aMethodBuilder [
 
-	baseSlot ifNotNil: [ ^ baseSlot emitStore: aMethodBuilder ].
-
-	aMethodBuilder storeInstVar: index
+	baseSlot emitStore: aMethodBuilder
 ]
 
 { #category : #'code generation' }
 LazyInitializedSlot >> emitValue: methodBuilder [
 
-	baseSlot 
-		ifNil: [ 	methodBuilder pushInstVar: index ]
-		ifNotNil: [ baseSlot emitValue: methodBuilder ].
+	baseSlot emitValue: methodBuilder.
 
 	methodBuilder 
 		pushDup;

@@ -1,6 +1,9 @@
 Class {
 	#name : #NilAwareSlot,
-	#superclass : #IndexedSlot,
+	#superclass : #Slot,
+	#instVars : [
+		'index'
+	],
 	#category : #'Slot-Extensions'
 }
 
@@ -13,7 +16,7 @@ NilAwareSlot class >> nilMapSlotName [
 { #category : #'accessing slots' }
 NilAwareSlot class >> valuesSlotName [
 	
-	^ #_values
+	^ #_valuesNotNil
 ]
 
 { #category : #'meta-object-protocol' }
@@ -38,6 +41,16 @@ NilAwareSlot >> doWrite: aValue to: anObject [
 	(self valuesSlotOf: anObject class) write: newValues to: anObject.
 
 	^ aValue.
+]
+
+{ #category : #accessing }
+NilAwareSlot >> index [
+	^ index
+]
+
+{ #category : #accessing }
+NilAwareSlot >> index: anObject [
+	index := anObject
 ]
 
 { #category : #testing }
@@ -72,6 +85,7 @@ NilAwareSlot >> nilMapSlotOf: aClass [
 NilAwareSlot >> read: anObject [
 	| nilMap values |
 	nilMap := ((self nilMapSlotOf: anObject class) read: anObject) ifNil: [0].
+	index ifNil: [ ^nil ].
 	(nilMap bitAt: index) = 0 ifTrue: [ ^nil ].
 	
 	values := (self valuesSlotOf: anObject class) read: anObject.
