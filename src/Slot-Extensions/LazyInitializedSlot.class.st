@@ -10,28 +10,28 @@ Class {
 }
 
 { #category : #'instance creation' }
-LazyInitializedSlot class >> default: aDefaultBlock initializationBlock: anInitializationBlock [ 
-
-	(aDefaultBlock isClean) ifFalse: [ self error: 'Default value block should be clean (only using globally access variables)' ].
-	(anInitializationBlock isClean) ifFalse: [ self error: 'Initialization block should be clean (only using globally access variables)' ].
-
+LazyInitializedSlot class >> default: aDefaultBlock initializationBlock: anInitializationBlock [
+	aDefaultBlock isClean
+		ifFalse: [ self error: 'Default value block should be clean (only using globally access variables)' ].
+	anInitializationBlock isClean
+		ifFalse: [ self error: 'Initialization block should be clean (only using globally access variables)' ].
 	^ self new
-		defaultValue: (aDefaultBlock value beReadOnlyObject; yourself);
+		defaultValue: aDefaultBlock ;
 		initializationBlock: anInitializationBlock;
-		yourself.
+		yourself
 ]
 
 { #category : #'instance creation' }
 LazyInitializedSlot class >> default: aDefaultBlock initializationBlock: anInitializationBlock baseSlot: aSlot [
-
-	(aDefaultBlock isClean) ifFalse: [ self error: 'Default value block should be clean (only using globally access variables)' ].
-	(anInitializationBlock isClean) ifFalse: [ self error: 'Initialization block should be clean (only using globally access variables)' ].
-
+	aDefaultBlock isClean
+		ifFalse: [ self error: 'Default value block should be clean (only using globally access variables)' ].
+	anInitializationBlock isClean
+		ifFalse: [ self error: 'Initialization block should be clean (only using globally access variables)' ].
 	^ self new
-		defaultValue: (aDefaultBlock value beReadOnlyObject; yourself);
+		defaultValue: aDefaultBlock ;
 		initializationBlock: anInitializationBlock;
 		baseSlot: aSlot;
-		yourself.
+		yourself
 ]
 
 { #category : #'instance creation' }
@@ -81,7 +81,7 @@ LazyInitializedSlot >> definitionString [
 				nextPutAll: self class name;
 				space;
 				nextPutAll: 'default: ';
-				nextPutAll: defaultValue asString;
+				nextPutAll: defaultValue printString;
 				space;
 				nextPutAll: 'initializationBlock: ';
 				nextPutAll: initializationBlock printString;
@@ -160,7 +160,10 @@ LazyInitializedSlot >> read: anObject [
 LazyInitializedSlot >> readOnlyWrapperFor: anObject [
 	^ ReadOnlyWrapper new
 		slot: self;
-		sharedValue: defaultValue;
+		sharedValue:
+			(defaultValue value
+				beReadOnlyObject;
+				yourself);
 		creationBlock: initializationBlock;
 		target: anObject;
 		yourself
