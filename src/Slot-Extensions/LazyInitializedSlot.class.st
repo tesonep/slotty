@@ -1,3 +1,6 @@
+"
+LAzy slot has a base slot, used as an indirection for being able to change the way the value is finally stored. 
+"
 Class {
 	#name : #LazyInitializedSlot,
 	#superclass : #Slot,
