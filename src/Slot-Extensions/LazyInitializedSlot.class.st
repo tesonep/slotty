@@ -154,12 +154,11 @@ LazyInitializedSlot >> read: anObject [
 
 { #category : #'meta-object-protocol' }
 LazyInitializedSlot >> readOnlyWrapperFor: anObject [
-	^ ReadOnlyWrapper new
-		slot: self;
-		sharedValue: defaultValue;
-		creationBlock: initializationBlock;
-		target: anObject;
-		yourself
+	^ ReadOnlyWrapper
+		newForSlot: self
+		sharedValue: defaultValue
+		creationBlock: initializationBlock
+		target: anObject
 ]
 
 { #category : #'meta-object-protocol' }

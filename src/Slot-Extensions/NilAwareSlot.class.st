@@ -2,7 +2,11 @@ Class {
 	#name : #NilAwareSlot,
 	#superclass : #Slot,
 	#instVars : [
-		'index'
+		'index',
+		'nilMapSlot',
+		'valuesSlot',
+		'cachedNilMap',
+		'cachedIndex'
 	],
 	#category : #'Slot-Extensions'
 }
@@ -21,12 +25,12 @@ NilAwareSlot class >> valuesSlotName [
 
 { #category : #'meta-object-protocol' }
 NilAwareSlot >> doWrite: aValue to: anObject [ 
-	| nilMap newValues realIndex oldValues usedIndexes|
+	| nilMap newValues oldValues usedIndexes|
 
 	"Using the original nilMap I calculate the used indexes and the original values."
-	nilMap := ((self nilMapSlotOf: anObject class) read: anObject) ifNil: [0].
+	nilMap := (self nilMapSlot read: anObject) ifNil: [0].
 	usedIndexes := self usedIndexesOf: nilMap.
-	oldValues := ((self valuesSlotOf: anObject class) read: anObject) ifNil: [#()].
+	oldValues := (self valuesSlot read: anObject) ifNil: [#()].
 
 	"I update the nilMap with the used bit, and create a new values"
 	nilMap := nilMap bitAt: index put: 1.
@@ -37,8 +41,8 @@ NilAwareSlot >> doWrite: aValue to: anObject [
 	newValues at: (self translateIndexUsing: nilMap) put: aValue.
 
 	"Store the state"
-	(self nilMapSlotOf: anObject class) write: nilMap to: anObject.
-	(self valuesSlotOf: anObject class) write: newValues to: anObject.
+	self nilMapSlot write: nilMap to: anObject.
+	self valuesSlot write: newValues to: anObject.
 
 	^ aValue.
 ]
@@ -62,6 +66,9 @@ NilAwareSlot >> isVirtual [
 NilAwareSlot >> layoutChanged: aClass [
 	super layoutChanged: aClass.
 
+	nilMapSlot := nil.
+	valuesSlot := nil.
+
 	(aClass allSlots select: [ :each | each isKindOf: NilAwareSlot ]) doWithIndex: [:each :anIndex | each index: anIndex ].
 
 	(aClass classLayout hasSlotNamed: self class nilMapSlotName)
@@ -76,19 +83,18 @@ NilAwareSlot >> layoutChanged: aClass [
 ]
 
 { #category : #'accessing slots' }
-NilAwareSlot >> nilMapSlotOf: aClass [ 
-	
-	^ aClass slotNamed: self class nilMapSlotName.
+NilAwareSlot >> nilMapSlot [
+	^ nilMapSlot ifNil: [ nilMapSlot := self owningClass slotNamed: self class nilMapSlotName ]
 ]
 
 { #category : #'meta-object-protocol' }
 NilAwareSlot >> read: anObject [
 	| nilMap values |
-	nilMap := ((self nilMapSlotOf: anObject class) read: anObject) ifNil: [0].
+	nilMap := (self nilMapSlot read: anObject) ifNil: [0].
 	index ifNil: [ ^nil ].
 	(nilMap bitAt: index) = 0 ifTrue: [ ^nil ].
 	
-	values := (self valuesSlotOf: anObject class) read: anObject.
+	values := self valuesSlot read: anObject.
 	
 	^ values at: (self translateIndexUsing: nilMap).
 	
@@ -103,7 +109,11 @@ NilAwareSlot >> translateIndex: anIndex using: aNilMap [
 { #category : #utils }
 NilAwareSlot >> translateIndexUsing: aNilMap [ 
 	
-	^ self translateIndex: index using: aNilMap
+	(cachedNilMap = aNilMap) 
+		ifTrue: [ ^ cachedIndex ]. 
+	
+	cachedNilMap := aNilMap.
+	^ cachedIndex := self translateIndex: index using: aNilMap
 ]
 
 { #category : #utils }
@@ -124,9 +134,9 @@ NilAwareSlot >> usedIndexesOf: aBitMap [
 ]
 
 { #category : #'accessing slots' }
-NilAwareSlot >> valuesSlotOf: aClass [ 
-	
-	^ aClass slotNamed: self class valuesSlotName.
+NilAwareSlot >> valuesSlot [
+
+	^ valuesSlot ifNil: [ valuesSlot := self owningClass slotNamed: self class valuesSlotName ]
 ]
 
 { #category : #'meta-object-protocol' }
@@ -139,20 +149,20 @@ NilAwareSlot >> write: aValue to: anObject [
 NilAwareSlot >> writeNilTo: anObject [
 
 	| nilMap values |
-	nilMap := ((self nilMapSlotOf: anObject class) read: anObject) ifNil: [0].
+	nilMap := (self nilMapSlot read: anObject) ifNil: [0].
 	(nilMap bitAt: index) = 0 ifTrue: [^ nil].
 
-	values := (self valuesSlotOf: anObject class) read: anObject.
+	values := self valuesSlot read: anObject.
 	values at: (self translateIndexUsing: nilMap) put: nil.
 
 	nilMap := nilMap bitAt: index put: 0.
-	(self nilMapSlotOf: anObject class) write: nilMap to: anObject.
+	self nilMapSlot write: nilMap to: anObject.
 
 
 	values := values copyWithout: nil.	
 	values size = 0 ifTrue: [ values := nil ].
 	
-   (self valuesSlotOf: anObject class) write: values to: anObject.
+  	self valuesSlot write: values to: anObject.
 		
 	^ nil.
 ]
