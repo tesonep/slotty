@@ -1,3 +1,6 @@
+"
+LAzy slot has a base slot, used as an indirection for being able to change the way the value is finally stored. 
+"
 Class {
 	#name : #LazyInitializedSlot,
 	#superclass : #Slot,
@@ -20,15 +23,15 @@ LazyInitializedSlot class >> default: aDefaultBlock initializationBlock: anIniti
 
 { #category : #'instance creation' }
 LazyInitializedSlot class >> default: aDefaultBlock initializationBlock: anInitializationBlock baseSlot: aSlot [
-
-	(aDefaultBlock isClean) ifFalse: [ self error: 'Default value block should be clean (only using globally access variables)' ].
-	(anInitializationBlock isClean) ifFalse: [ self error: 'Initialization block should be clean (only using globally access variables)' ].
-
+	aDefaultBlock isClean
+		ifFalse: [ self error: 'Default value block should be clean (only using globally access variables)' ].
+	anInitializationBlock isClean
+		ifFalse: [ self error: 'Initialization block should be clean (only using globally access variables)' ].
 	^ self new
-		defaultValue: (aDefaultBlock value beReadOnlyObject; yourself);
+		defaultValue: aDefaultBlock ;
 		initializationBlock: anInitializationBlock;
 		baseSlot: aSlot;
-		yourself.
+		yourself
 ]
 
 { #category : #'instance creation' }

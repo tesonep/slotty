@@ -80,6 +80,27 @@ ReadOnlyWrapper >> = another [
 ]
 
 { #category : #accessing }
+ReadOnlyWrapper >> asString [
+	^ self doesNotUnderstand: (Message selector: #asString arguments: {})
+]
+
+{ #category : #accessing }
+ReadOnlyWrapper >> at: anIndex [
+	^ self doesNotUnderstand: (Message selector: #at: arguments: {anIndex})
+]
+
+{ #category : #accessing }
+ReadOnlyWrapper >> at: anIndex put: anObject [
+	^ self
+		doesNotUnderstand:
+			(Message
+				selector: #at:put:
+				arguments:
+					{anIndex.
+					anObject})
+]
+
+{ #category : #accessing }
 ReadOnlyWrapper >> creationBlock [
 	^ creationBlock
 ]
@@ -114,6 +135,11 @@ ReadOnlyWrapper >> initialize [
 ]
 
 { #category : #accessing }
+ReadOnlyWrapper >> printString [
+	^ self doesNotUnderstand: (Message selector: #printString arguments: {})
+]
+
+{ #category : #accessing }
 ReadOnlyWrapper >> sharedValue [
 	^ sharedValue
 ]
@@ -125,7 +151,7 @@ ReadOnlyWrapper >> sharedValue: anObject [
 
 { #category : #accessing }
 ReadOnlyWrapper >> size [
-	^ sharedValue size
+	^ self doesNotUnderstand: (Message selector: #size arguments: {})
 ]
 
 { #category : #accessing }
