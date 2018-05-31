@@ -27,9 +27,9 @@ ReadOnlyWrapper class >> newForSlot: aSlot sharedValue: defaultValue creationBlo
 	
 	wrapper ifNotNil: [ ^ wrapper ].
 	
-	wrapper := ReadOnlyWrapper new
+	wrapper := self new
 		slot: aSlot;
-		sharedValue: defaultValue;
+		sharedValue: (defaultValue value beReadOnlyObject; yourself);
 		creationBlock: initializationBlock;
 		target: target;
 		yourself.
