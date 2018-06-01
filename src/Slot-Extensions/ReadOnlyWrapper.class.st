@@ -53,6 +53,17 @@ ReadOnlyWrapper class >> removeWrapper: aSlot of: aTarget [
 ]
 
 { #category : #'instance creation' }
+ReadOnlyWrapper class >> replaceWrapper: aSlot of: aTarget with: aValue [
+	| wrapper |
+
+	wrapper := self wrapperFor: aTarget slot: aSlot.
+	self removeWrapper: aSlot of: aTarget.
+
+	wrapper becomeForward: aValue.
+
+]
+
+{ #category : #'instance creation' }
 ReadOnlyWrapper class >> resetWrappers [
 	InstanceMap := nil.
 ]
@@ -118,7 +129,7 @@ ReadOnlyWrapper >> doesNotUnderstand: aMessage [
 		
 		newInstance := creationBlock value.
 
-		target ifNotNil: [ slot write: newInstance to: target ].
+		target ifNotNil: [ slot basicWrite: newInstance to: target ].
 	
 		self class removeWrapper: slot of: target.		
 

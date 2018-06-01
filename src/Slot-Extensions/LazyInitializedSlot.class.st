@@ -58,6 +58,12 @@ LazyInitializedSlot >> baseSlot: anObject [
 	baseSlot := anObject
 ]
 
+{ #category : #'meta-object-protocol' }
+LazyInitializedSlot >> basicWrite: aValue to: anObject [
+
+	^ baseSlot ifNil: [super write: aValue to: anObject] ifNotNil: [ baseSlot write: aValue to: anObject ].
+]
+
 { #category : #accessing }
 LazyInitializedSlot >> defaultValue [
 	^ defaultValue
@@ -172,5 +178,6 @@ LazyInitializedSlot >> wrapperFor: anObject orValue: obj [
 { #category : #'meta-object-protocol' }
 LazyInitializedSlot >> write: aValue to: anObject [
 
-	^ baseSlot ifNil: [super write: aValue to: anObject] ifNotNil: [ baseSlot write: aValue to: anObject ].
+	ReadOnlyWrapper replaceWrapper: self of: anObject with: aValue.
+	^ self basicWrite: aValue to: anObject
 ]
