@@ -56,10 +56,10 @@ ReadOnlyWrapper class >> removeWrapper: aSlot of: aTarget [
 ReadOnlyWrapper class >> replaceWrapper: aSlot of: aTarget with: aValue [
 	| wrapper |
 
-	wrapper := self wrapperFor: aTarget slot: aSlot.
+	wrapper := (self wrapperFor: aTarget slot: aSlot) ifNil: [^ self].
 	self removeWrapper: aSlot of: aTarget.
 
-	wrapper becomeForward: aValue.
+	wrapper becomeForward: wrapper defaultValue.
 
 ]
 
