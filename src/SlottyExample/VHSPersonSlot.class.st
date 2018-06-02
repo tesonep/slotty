@@ -4,10 +4,9 @@ Class {
 	#instVars : [
 		'#name => NilAwareSlot',
 		'#movies => (LazyInitializedSlot default: [ OrderedCollection new ] initializationBlock: [ OrderedCollection new ] baseSlotClass: NilAwareSlot)',
-		'#birthday => NilAwareSlot',
-		'#_movies => NilAwareSlot'
+		'#birthday => NilAwareSlot'
 	],
-	#category : #'SlottyExample-plain'
+	#category : #'SlottyExample-slot'
 }
 
 { #category : #initialization }

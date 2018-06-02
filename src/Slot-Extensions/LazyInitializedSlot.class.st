@@ -36,8 +36,11 @@ LazyInitializedSlot class >> default: aDefaultBlock initializationBlock: anIniti
 
 { #category : #'instance creation' }
 LazyInitializedSlot class >> default: aDefaultBlock initializationBlock: anInitializationBlock baseSlotClass: aSlotClass [
+	| baseSlot |
+	baseSlot := aSlotClass new.
+	(baseSlot class canUnderstand: #beInvisible) ifTrue: [ baseSlot beInvisible ].
 
-	^ self default: aDefaultBlock initializationBlock: anInitializationBlock baseSlot: aSlotClass new.
+	^ self default: aDefaultBlock initializationBlock: anInitializationBlock baseSlot: baseSlot.
 ]
 
 { #category : #comparing }
@@ -62,6 +65,13 @@ LazyInitializedSlot >> baseSlot: anObject [
 LazyInitializedSlot >> basicWrite: aValue to: anObject [
 
 	^ baseSlot ifNil: [super write: aValue to: anObject] ifNotNil: [ baseSlot write: aValue to: anObject ].
+]
+
+{ #category : #refactoring }
+LazyInitializedSlot >> createRefactoring: variableRefactoringClass for: declarationClass [
+	^variableRefactoringClass 
+			variable: self name
+			class: declarationClass
 ]
 
 { #category : #accessing }
@@ -137,14 +147,27 @@ LazyInitializedSlot >> isVirtual [
 
 { #category : #'class building' }
 LazyInitializedSlot >> layoutChanged: aClass [
-	super layoutChanged: aClass.
+	| slotsToAdd slots |
 	
-	baseSlot ifNil: [ ^ self ].
+	super layoutChanged: aClass.
 
-	(aClass classLayout hasSlot: baseSlot)
-		ifTrue: [ ^ self ]. 
-		
-	aClass addSlot: baseSlot
+	(aClass classLayout hasSlotNamed: baseSlot name)
+		ifTrue: [ baseSlot := aClass slotNamed: baseSlot name ].
+
+	slots := aClass classLayout slots asOrderedCollection.
+
+	slotsToAdd := aClass classLayout slots
+ 		select: [ :e | (e isKindOf: LazyInitializedSlot) and: [ e needsToCreateSlot: aClass ] ]
+		thenCollect: [ :e | e baseSlot ].
+
+	slotsToAdd ifEmpty: [ ^ self ].
+
+	slots addAll: slotsToAdd.
+	
+	aClass classInstaller update: aClass to: [ :builder |
+		builder
+			fillFor: aClass;
+			slots: slots asArray ].			
 
 ]
 
@@ -152,6 +175,11 @@ LazyInitializedSlot >> layoutChanged: aClass [
 LazyInitializedSlot >> name: aName [
 	super name: aName.
 	baseSlot ifNotNil: [	baseSlot name: ('_' , aName) asSymbol]
+]
+
+{ #category : #testing }
+LazyInitializedSlot >> needsToCreateSlot: aClass [
+	^ (aClass classLayout hasSlotNamed: baseSlot name) not
 ]
 
 { #category : #'meta-object-protocol' }

@@ -6,7 +6,8 @@ Class {
 		'nilMapSlot',
 		'valuesSlot',
 		'cachedNilMap',
-		'cachedIndex'
+		'cachedIndex',
+		'visible'
 	],
 	#category : #'Slot-Extensions'
 }
@@ -21,6 +22,23 @@ NilAwareSlot class >> nilMapSlotName [
 NilAwareSlot class >> valuesSlotName [
 	
 	^ #_valuesNotNil
+]
+
+{ #category : #accessing }
+NilAwareSlot >> beInvisible [
+	visible := false
+]
+
+{ #category : #accessing }
+NilAwareSlot >> beVisible [
+	visible := true
+]
+
+{ #category : #refactoring }
+NilAwareSlot >> createRefactoring: variableRefactoringClass for: declarationClass [
+	^variableRefactoringClass 
+			variable: self name
+			class: declarationClass
 ]
 
 { #category : #'meta-object-protocol' }
@@ -60,6 +78,11 @@ NilAwareSlot >> index: anObject [
 { #category : #testing }
 NilAwareSlot >> isVirtual [
 	^ true
+]
+
+{ #category : #testing }
+NilAwareSlot >> isVisible [
+	^ visible ifNil: [ true ]
 ]
 
 { #category : #'meta-object-protocol' }
