@@ -92,7 +92,7 @@ NilAwareSlot >> layoutChanged: aClass [
 	nilMapSlot := nil.
 	valuesSlot := nil.
 
-	(aClass allSlots select: [ :each | each isKindOf: NilAwareSlot ]) doWithIndex: [:each :anIndex | each index: anIndex ].
+	(aClass classLayout allSlots select: [ :each | each isKindOf: NilAwareSlot ]) doWithIndex: [:each :anIndex | each index: anIndex ].
 
 	(aClass classLayout hasSlotNamed: self class nilMapSlotName)
 		ifTrue: [ ^ self ]. 
@@ -100,7 +100,7 @@ NilAwareSlot >> layoutChanged: aClass [
 	aClass classInstaller update: aClass to: [ :builder |
 		builder
 			fillFor: aClass;
-			slots: ((aClass slots copyWith:(self class nilMapSlotName => BaseSlot default: 0)) copyWith:(self class valuesSlotName => BaseSlot default: nil))].			
+			slots: ((aClass slots copyWith:(self class nilMapSlotName => BaseSlot)) copyWith:(self class valuesSlotName => BaseSlot))].			
 			
 
 ]
@@ -153,7 +153,7 @@ NilAwareSlot >> usedIndexesOf: aBitMap [
 		idx := idx + 1.
 	].
 
-	^ used asArray.
+	^ used.
 ]
 
 { #category : #'accessing slots' }

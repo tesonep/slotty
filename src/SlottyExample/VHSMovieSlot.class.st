@@ -126,12 +126,6 @@ VHSMovieSlot >> genres: anObject [
 	genres := anObject
 ]
 
-{ #category : #initialization }
-VHSMovieSlot >> initialize [
-	super initialize.
-	self class initializeSlots: self.
-]
-
 { #category : #accessing }
 VHSMovieSlot >> internationalReleaseDates [
 	^ internationalReleaseDates
